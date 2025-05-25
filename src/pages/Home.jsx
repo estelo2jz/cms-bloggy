@@ -49,7 +49,7 @@ function Home() {
 
   return (
     <div className="home container">
-      <h1 className="home__heading">Blog Home</h1>
+      <h1 className="home__heading"></h1>
       <div className="home__filters">
         <select
           className="home__select"

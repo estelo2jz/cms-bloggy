@@ -33,3 +33,49 @@
     }
   }
 }
+
+
+.editor-dashboard {
+  &__divider {
+    margin: 3rem 0 1.5rem;
+    border: none;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  &__subheading {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    color: #4f46e5;
+  }
+
+  &__posts {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  &__post-card {
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+
+    h4 {
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+      color: #111827;
+    }
+
+    &__meta {
+      font-size: 0.95rem;
+      color: #555;
+    }
+
+    &__stats {
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+      color: #4b5563;
+    }
+  }
+}
