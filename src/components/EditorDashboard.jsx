@@ -4,6 +4,7 @@ import { getAuthorName } from '../utils/auth';
 import './styles/EditorDashboard.scss';
 
 function EditorDashboard() {
+  
   const [stats, setStats] = useState({
     total: 0,
     categories: [],
