@@ -1,30 +1,32 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { getPosts } from '../utils/storage';
 import { getAuthorName } from '../utils/auth';
 import './styles/EditorDashboard.scss';
 
 function EditorDashboard() {
-  
   const [stats, setStats] = useState({
     total: 0,
     categories: [],
     tags: [],
     latestDate: null,
   });
-  const [myPosts, setMyPosts] = useState([]);
 
+  const [myPosts, setMyPosts] = useState([]);
   const author = getAuthorName();
 
   useEffect(() => {
     const allPosts = Array.isArray(getPosts()) ? getPosts() : [];
     const filtered = allPosts.filter((p) => p.author === author);
 
-    // Simulate views/comments (real logic would come from a DB)
-    const postsWithStats = filtered.map((post) => ({
-      ...post,
-      views: Math.floor(Math.random() * 500),
-      comments: Math.floor(Math.random() * 20),
-    }));
+    const postsWithStats = filtered.map((post) => {
+      const likes = parseInt(localStorage.getItem(`likes-${post.id}`)) || 0;
+      const comments = JSON.parse(localStorage.getItem(`comments-${post.id}`)) || [];
+      return { ...post, likes, comments };
+    });
+
+    // ✅ Sort by most liked
+    postsWithStats.sort((a, b) => b.likes - a.likes);
 
     const allTags = filtered.flatMap((p) => p.tags || []);
     const allCategories = filtered.map((p) => p.category || 'uncategorized');
@@ -77,12 +79,29 @@ function EditorDashboard() {
             <div key={post.id} className="editor-dashboard__post-card">
               <h4>{post.title}</h4>
               <p className="editor-dashboard__meta">
-                Category: <strong>{post.category}</strong> •{' '}
-                Tags: <em>{post.tags.join(', ') || 'None'}</em>
+                Category: <strong>{post.category}</strong> • Tags:{' '}
+                <em>{post.tags.join(', ') || 'None'}</em>
               </p>
+
               <p className="editor-dashboard__stats">
-                👁 {post.views} views &nbsp; 💬 {post.comments} comments
+                ❤️ {post.likes} likes &nbsp; 💬 {post.comments.length} comments
               </p>
+
+              {/* ✅ Preview latest 2 comments */}
+              {post.comments.length > 0 && (
+                <div className="editor-dashboard__preview-comments">
+                  {post.comments.slice(-2).map((c, i) => (
+                    <div key={i} className="editor-dashboard__comment">
+                      <strong>{c.name}</strong>: {c.text}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* ✅ View Post Link */}
+              <Link to={`/post/${post.id}`} className="editor-dashboard__view-link">
+                View Full Post →
+              </Link>
             </div>
           ))
         )}

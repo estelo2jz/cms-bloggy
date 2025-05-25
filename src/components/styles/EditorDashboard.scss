@@ -80,3 +80,39 @@
   }
 }
 
+
+.editor-dashboard__stats {
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  color: #4b5563;
+}
+
+
+.editor-dashboard__preview-comments {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: #f9fafb;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  color: #374151;
+
+  .editor-dashboard__comment {
+    margin-bottom: 0.5rem;
+
+    strong {
+      color: #111827;
+    }
+  }
+}
+
+.editor-dashboard__view-link {
+  display: inline-block;
+  margin-top: 0.75rem;
+  font-weight: bold;
+  color: #4f46e5;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

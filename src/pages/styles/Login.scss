@@ -72,3 +72,17 @@
     text-align: center;
   }
 }
+
+
+.login__remember {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  color: #374151;
+  margin-bottom: 1rem;
+
+  input[type='checkbox'] {
+    transform: scale(1.1);
+  }
+}
