@@ -8,27 +8,54 @@ import './styles/PostDetail.scss';
 function PostDetail() {
   const { id } = useParams();
   const [post, setPost] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [likes, setLikes] = useState(0);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
+  const [visibleComments, setVisibleComments] = useState(3);
 
   const author = getAuthorName();
 
   const getFallbackImage = (prompt = 'blog') =>
     `https://source.unsplash.com/800x400/?${encodeURIComponent(prompt)}`;
 
-  // ✅ Update post and related data every time `id` changes
-  useEffect(() => {
-    const posts = getPosts();
-    const found = posts.find((p) => p.id.toString() === id);
-    setPost(found || null);
+  const getInitials = (name = 'User') => {
+    const parts = name.trim().split(' ');
+    return parts.length > 1
+      ? parts[0][0] + parts[1][0]
+      : parts[0][0] + parts[0][1];
+  };
 
-    if (found) {
-      const savedLikes = parseInt(localStorage.getItem(`likes-${id}`)) || 0;
-      const savedComments = JSON.parse(localStorage.getItem(`comments-${id}`)) || [];
-      setLikes(savedLikes);
-      setComments(savedComments);
-    }
+  const timeAgo = (timestamp) => {
+    const seconds = Math.floor((new Date() - new Date(timestamp)) / 1000);
+    if (seconds < 60) return `${seconds}s ago`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+    return new Date(timestamp).toLocaleDateString();
+  };
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    setLoading(true);
+
+    const timeout = setTimeout(() => {
+      const posts = getPosts();
+      const found = posts.find((p) => p.id.toString() === id);
+      setPost(found || null);
+
+      if (found) {
+        const savedLikes = parseInt(localStorage.getItem(`likes-${id}`)) || 0;
+        const savedComments = JSON.parse(localStorage.getItem(`comments-${id}`)) || [];
+        const sessionComment = sessionStorage.getItem(`draft-${id}`) || '';
+        setLikes(savedLikes);
+        setComments(savedComments);
+        setNewComment(sessionComment);
+      }
+
+      setLoading(false);
+    }, 400);
+
+    return () => clearTimeout(timeout);
   }, [id]);
 
   const handleLike = () => {
@@ -37,11 +64,18 @@ function PostDetail() {
     setLikes(updated);
   };
 
+  const handleCommentChange = (e) => {
+    const value = e.target.value;
+    setNewComment(value);
+    sessionStorage.setItem(`draft-${id}`, value);
+  };
+
   const handleCommentSubmit = (e) => {
     e.preventDefault();
     if (!newComment.trim()) return;
 
     const newEntry = {
+      id: Date.now(),
       name: author || 'Anonymous',
       text: newComment,
       time: new Date().toISOString(),
@@ -51,7 +85,27 @@ function PostDetail() {
     localStorage.setItem(`comments-${id}`, JSON.stringify(updated));
     setComments(updated);
     setNewComment('');
+    sessionStorage.removeItem(`draft-${id}`);
+    setVisibleComments((prev) => prev + 1);
   };
+
+  const handleDeleteComment = (commentId) => {
+    const updated = comments.filter((c) => c.id !== commentId);
+    localStorage.setItem(`comments-${id}`, JSON.stringify(updated));
+    setComments(updated);
+  };
+
+  const handleLoadMore = () => {
+    setVisibleComments((prev) => prev + 3);
+  };
+
+  if (loading) {
+    return (
+      <div className="post-detail container">
+        <p className="post-detail__loading">Loading post...</p>
+      </div>
+    );
+  }
 
   if (!post) {
     return (
@@ -61,6 +115,8 @@ function PostDetail() {
       </div>
     );
   }
+
+  const visible = comments.slice(0, visibleComments);
 
   return (
     <div className="post-detail container">
@@ -90,20 +146,38 @@ function PostDetail() {
 
       <div className="post-detail__comments">
         <h3>Comments</h3>
-        {comments.length === 0 && <p>No comments yet.</p>}
+        {visible.length === 0 && <p>No comments yet.</p>}
         <ul>
-          {comments.map((c, i) => (
-            <li key={i}>
-              <strong>{c.name}</strong>: {c.text}
+          {visible.map((c) => (
+            <li key={c.id} className="post-detail__comment animate">
+              <div className="avatar">{getInitials(c.name)}</div>
+              <div className="bubble">
+                <div className="top">
+                  <strong>{c.name}</strong>
+                  <span className="time">{timeAgo(c.time)}</span>
+                </div>
+                <p>{c.text}</p>
+                {c.name === author && (
+                  <button className="delete-btn" onClick={() => handleDeleteComment(c.id)}>
+                    Delete
+                  </button>
+                )}
+              </div>
             </li>
           ))}
         </ul>
+
+        {visibleComments < comments.length && (
+          <div className="post-detail__loadmore">
+            <button onClick={handleLoadMore}>Load More</button>
+          </div>
+        )}
 
         <form onSubmit={handleCommentSubmit}>
           <textarea
             placeholder="Write a comment..."
             value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
+            onChange={handleCommentChange}
             rows="3"
             required
           />

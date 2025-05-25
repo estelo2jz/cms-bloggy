@@ -48,7 +48,7 @@ function Home() {
 
   return (
     <div className="home">
-      <h1 className="home__heading">Blog Feed</h1>
+      <h1 className="home__heading"></h1>
 
       <div className="home__filters">
         <input
