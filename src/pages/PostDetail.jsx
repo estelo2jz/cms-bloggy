@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { getPosts } from '../utils/storage';
 import { getAuthorName } from '../utils/auth';
 import ReactMarkdown from 'react-markdown';
+import Thumbnail from '../components/Thumbnail';
 import './styles/PostDetail.scss';
 
 function PostDetail() {
@@ -123,12 +124,10 @@ function PostDetail() {
       <h1 className="post-detail__title">{post.title}</h1>
 
       <div className="post-detail__image-wrapper">
-        <img
-          src={post.image || getFallbackImage(post.title)}
-          alt="Post visual"
-          className="post-detail__image"
-        />
+        <Thumbnail src={post.image} title={post.title} />
       </div>
+
+
 
       <p className="post-detail__meta">
         <strong>Author:</strong> {post.author} &nbsp; | &nbsp;
